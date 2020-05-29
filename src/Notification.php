@@ -12,25 +12,29 @@ use Carbon\Carbon;
 
 class Notification
 {
-    protected $factory;
+    public $factory;
+    public $chanel_name;
     public function channel($name)
     {
-        $channel_name="Pqf\\Channel\\". ucfirst($name);
-        if(!class_exists($channel_name,false)){
-            return new NotificationResponse(1,printf("Notification Channel %s Doesn't exist",$name));
+        $channel_name="Pqf\\Notification\\Channel\\".ucfirst($name);
+        try{
+            $factory=new $channel_name;
+            $this->factory=$factory;
+            $this->chanel_name=$name;
+            return $this;
+        }catch (\Exception $e){
+            throw new \Exception(sprintf("Notification Channel %s Doesn't exist",$this->chanel_name));
         }
-        $factory=new $channel_name;
-        $this->factory=$factory;
-        return $this;
-
     }
-
     public function sendSms($account, $content)
     {
-        if(!is_callable($this->factory)){
-            return new NotificationResponse(1,'Please chose the send channel');
+        if(!is_callable([$this->factory,'send'])){
+            return [
+                'success' => false,
+                'message' =>sprintf("Notification Channel %s Doesn't exist",$this->chanel_name),
+            ];
         }
-        return call_user_func_array([$this->factory,'sendSms'],[$account,$content]);
+        return call_user_func_array([$this->factory,'send'],[$account,$content]);
 
     }
 

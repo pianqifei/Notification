@@ -14,10 +14,8 @@ class Submail implements SendMessage
 {
     public function send($account, $content)
     {
-        $config = config('pqfno');
-        $sign=$config['sign'];
-        $sign = Arr::get($sign, '【');
-        $sign = Arr::get($sign, '】');
+        $config = config('pqfno.channel.submail');
+        $sign=config('pqfno.sign','');
         $sign = Str::start($sign, '【');
         $sign = Str::finish($sign, '】');
         if (!Str::contains($content, $sign)) {
